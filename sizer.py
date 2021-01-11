@@ -173,7 +173,7 @@ class SizerCell:
 
 class Sizer:
 
-    _default_proportion = 0.
+    _default_proportions = (0., 0.)
 
     def __init__(self, prim_dir, prim_limit=0, gaps=(0, 0)):
 
@@ -467,20 +467,20 @@ class Sizer:
         return self._min_size
 
     @staticmethod
-    def get_default_proportion():
+    def get_default_proportions():
 
-        return Sizer._default_proportion
+        return Sizer._default_proportions
 
     @staticmethod
-    def set_default_proportion(proportion):
+    def set_default_proportions(column_proportion=0., row_proportion=0.):
         """
-        Set the proportion to be applied to *any* sizer's rows and columns when
+        Set the proportions to be applied to *any* sizer's columns and rows when
         there is no explicitly set proportion and no proportions associated
-        with any cells for those rows and/or columns.
+        with any cells for those columns and/or rows.
 
         """
 
-        Sizer._default_proportion = max(0., proportion)
+        Sizer._default_proportions = (max(0., column_proportion), max(0., row_proportion))
 
     def __get_cell_proportions(self):
         """
@@ -514,9 +514,10 @@ class Sizer:
             sec_proportions.append(sec_proportion)
             del cells[:prim_limit]
 
-        default_p = self._default_proportion
-        prim_proportions[:] = [default_p if p < 0. else p for p in prim_proportions]
-        sec_proportions[:] = [default_p if p < 0. else p for p in sec_proportions]
+        default_prim_p = self._default_proportions[prim_dim]
+        default_sec_p = self._default_proportions[1-prim_dim]
+        prim_proportions[:] = [default_prim_p if p < 0. else p for p in prim_proportions]
+        sec_proportions[:] = [default_sec_p if p < 0. else p for p in sec_proportions]
 
         return proportions
 
