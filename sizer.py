@@ -1,6 +1,6 @@
 # Author: Epihaius
 # Date: 2021-01-09
-# Last revision: 2021-01-09
+# Last revision: 2021-01-11
 #
 # This module defines classes to implement a layout system based on "sizers",
 # the purpose of which is to maintain the relative placement of "primitives"
@@ -14,7 +14,7 @@ class SizerCell:
         self._sizer = sizer
         self._obj = obj
         self._type = obj_type
-        self.proportions = proportions if proportions else (0., 0.)
+        self.proportions = proportions if proportions else (-1., -1.)
         self.alignments = alignments if alignments else ("expand", "expand")
         l, r, b, t = self._borders = borders if borders else (0, 0, 0, 0)
         self._obj_offset = (l, t)
@@ -37,7 +37,7 @@ class SizerCell:
 
         self._obj = None
         self._type = ""
-        self.proportions = (0., 0.)
+        self.proportions = (-1., -1.)
         self.alignments = ("expand", "expand")
         self._borders = (0, 0, 0, 0)
         self._obj_offset = (0, 0)
@@ -172,6 +172,8 @@ class SizerCell:
 
 
 class Sizer:
+
+    _default_proportion = 0.
 
     def __init__(self, prim_dir, prim_limit=0, gaps=(0, 0)):
 
@@ -464,6 +466,22 @@ class Sizer:
 
         return self._min_size
 
+    @staticmethod
+    def get_default_proportion():
+
+        return Sizer._default_proportion
+
+    @staticmethod
+    def set_default_proportion(proportion):
+        """
+        Set the proportion to be applied to *any* sizer's rows and columns when
+        there is no explicitly set proportion and no proportions associated
+        with any cells for those rows and/or columns.
+
+        """
+
+        Sizer._default_proportion = max(0., proportion)
+
     def __get_cell_proportions(self):
         """
         Return the largest horizontal and vertical proportions associated with
@@ -480,13 +498,13 @@ class Sizer:
         prim_dim = self.prim_dim
         prim_limit = len(self._cells) if self.prim_limit == 0 else self.prim_limit
         proportions = [None, None]
-        proportions[prim_dim] = prim_proportions = [0.] * len(self._cells[:prim_limit])
+        proportions[prim_dim] = prim_proportions = [-1.] * len(self._cells[:prim_limit])
         proportions[1-prim_dim] = sec_proportions = []
         cells = self._cells[:]
 
         while cells:
 
-            sec_proportion = 0.
+            sec_proportion = -1.
 
             for i, cell in enumerate(cells[:prim_limit]):
                 min_size = cell.update_min_size()
@@ -495,6 +513,10 @@ class Sizer:
 
             sec_proportions.append(sec_proportion)
             del cells[:prim_limit]
+
+        default_p = self._default_proportion
+        prim_proportions[:] = [default_p if p < 0. else p for p in prim_proportions]
+        sec_proportions[:] = [default_p if p < 0. else p for p in sec_proportions]
 
         return proportions
 
