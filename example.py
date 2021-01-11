@@ -2,7 +2,7 @@
 
 # Author: Epihaius
 # Date: 2021-01-09
-# Last revision: 2021-01-09
+# Last revision: 2021-01-11
 #
 # This layout system is applicable to any kind of object that has a position
 # and a size, e.g. colored rectangles in an image or widgets of a GUI system.
@@ -98,37 +98,40 @@ class App:
         block1 = BlockA(10, 10, sizer_borders=(2, 2, 1, 1))
         # add the block to `v_sizer1`, associating a vertical proportion of 1.
         # with its cell, which will be applied to its row in absence of an
-        # explicitly set proportion
-        v_sizer1.add(block1, proportions=(0., 1.))
+        # explicitly set proportion;
+        # a negative value is passed for the horizontal proportion, such that the
+        # default proportion will be applied to the cell's column if none is set
+        # explicitly
+        v_sizer1.add(block1, proportions=(-1., 1.))
         # create a new grid-like sizer with space between its rows and columns...
         block1_sizer = Sizer("vertical", 3, gaps=(1, 2))
         # ...and assign it to `block1`; this allows the creation of a nested
         # layout, linked to `block1`
         block1.sizer = block1_sizer
         # create a nested layout
-        block1_sizer.add(BlockC(5, 2, block1), proportions=(0., .5))
-        block1_sizer.add(BlockB(10, 2, block1), proportions=(0., 1.))
-        block1_sizer.add(BlockC(5, 2, block1), proportions=(0., .5))
+        block1_sizer.add(BlockC(5, 2, block1), proportions=(-1., .5))
+        block1_sizer.add(BlockB(10, 2, block1), proportions=(-1., 1.))
+        block1_sizer.add(BlockC(5, 2, block1), proportions=(-1., .5))
         block1_sizer.add(BlockB(10, 2, block1))
-        block1_sizer.add(BlockC(5, 2, block1), proportions=(1., 0.))
+        block1_sizer.add(BlockC(5, 2, block1), proportions=(1., -1.))
         # add another block to `v_sizer1`, associating a horizontal proportion
         # of 1. with its cell, which will be applied to its column in absence of
         # an explicitly set proportion
-        v_sizer1.add(BlockB(10, 2), proportions=(1., 0.), borders=(1, 2, 4, 3))
+        v_sizer1.add(BlockB(10, 2), proportions=(1., -1.), borders=(1, 2, 4, 3))
         # add a third block to `v_sizer1`, associating a vertical proportion of
         # .5 with its cell, which will be applied to its row in absence of an
         # explicitly set proportion
-        v_sizer1.add(BlockC(5, 2), proportions=(0., .5))
+        v_sizer1.add(BlockC(5, 2), proportions=(-1., .5))
         # create the second vertical subsizer with space between its rows...
         v_sizer2 = Sizer("vertical", gaps=(0, 2))
         # ...and add it to the main sizer, with 1-unit borders around it and
         # centered horizontally within its column
         main_sizer.add(v_sizer2, alignments=("center", "expand"), borders=(1, 1, 1, 1))
         v_sizer2.add(BlockA(5, 2))
-        v_sizer2.add(BlockB(20, 2), proportions=(0., .25))
+        v_sizer2.add(BlockB(20, 2), proportions=(-1., .25))
         # add a third block to `v_sizer2` and request it to be aligned to the
         # right of its cell
-        v_sizer2.add(BlockC(1, 2), proportions=(0., .75), alignments=("max", "expand"))
+        v_sizer2.add(BlockC(1, 2), proportions=(-1., .75), alignments=("max", "expand"))
         # create the layout by updating the main sizer with the size of the
         # available space
         total_space = (80, 60)
