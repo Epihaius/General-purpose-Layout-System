@@ -762,11 +762,11 @@ class Sizer:
 
         self._pos = pos
 
-    def update_positions(self, start_pos=None):
+    def update_positions(self):
 
         prim_dim = self.prim_dim
         prim_limit = len(self._cells) if self.prim_limit == 0 else self.prim_limit
-        start_pos = list(self._pos) if start_pos is None else list(start_pos)
+        start_pos = list(self._pos)
         start_coord = start_pos[prim_dim]
 
         cells = self._cells[:]
@@ -794,7 +794,7 @@ class Sizer:
                 elif cell.type == "sizer":
 
                     obj.set_pos(pos)
-                    obj.update_positions(pos)
+                    obj.update_positions()
 
                 start_pos[prim_dim] += size[prim_dim] + gaps[prim_dim]
 
