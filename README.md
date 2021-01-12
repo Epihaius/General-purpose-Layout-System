@@ -129,3 +129,5 @@ class App:
 
 App()
 ```
+
+An in-depth explanation with more code examples as well as a complete API reference can be found in the [Wiki](https://github.com/Epihaius/General-purpose-Layout-System/wiki).
