@@ -1,6 +1,6 @@
 # Author: Epihaius
 # Date: 2021-01-09
-# Last revision: 2021-01-11
+# Last revision: 2021-01-12
 #
 # This module defines classes to implement a layout system based on "sizers",
 # the purpose of which is to maintain the relative placement of "primitives"
@@ -173,7 +173,7 @@ class SizerCell:
 
 class Sizer:
 
-    _default_proportions = (0., 0.)
+    _global_default_proportions = (0., 0.)
 
     def __init__(self, prim_dir, prim_limit=0, gaps=(0, 0)):
 
@@ -187,6 +187,7 @@ class Sizer:
         # max. number of cells in each row (horizontal growth) or column (vertical growth)
         self.prim_limit = prim_limit
         self._gaps = [gaps[0], gaps[1]]
+        self._default_proportions = (-1., -1.)
         self._proportions = [{}, {}]
         self._pos = (0, 0)
         # minimum size without any contents
@@ -467,12 +468,12 @@ class Sizer:
         return self._min_size
 
     @staticmethod
-    def get_default_proportions():
+    def get_global_default_proportions():
 
-        return Sizer._default_proportions
+        return Sizer._global_default_proportions
 
     @staticmethod
-    def set_default_proportions(column_proportion=0., row_proportion=0.):
+    def set_global_default_proportions(column_proportion=0., row_proportion=0.):
         """
         Set the proportions to be applied to *any* sizer's columns and rows when
         there is no explicitly set proportion and no proportions associated
@@ -480,7 +481,22 @@ class Sizer:
 
         """
 
-        Sizer._default_proportions = (max(0., column_proportion), max(0., row_proportion))
+        Sizer._global_default_proportions = (max(0., column_proportion),
+                                             max(0., row_proportion))
+
+    def get_default_proportions(self):
+
+        return self._default_proportions
+
+    def set_default_proportions(self, column_proportion=-1., row_proportion=-1.):
+        """
+        Set the proportions to be applied to *this* sizer's columns and rows
+        when there is no explicitly set proportion and no proportions associated
+        with any cells for those columns and/or rows.
+
+        """
+
+        self._default_proportions = (column_proportion, row_proportion)
 
     def __get_cell_proportions(self):
         """
@@ -514,8 +530,10 @@ class Sizer:
             sec_proportions.append(sec_proportion)
             del cells[:prim_limit]
 
-        default_prim_p = self._default_proportions[prim_dim]
-        default_sec_p = self._default_proportions[1-prim_dim]
+        default_proportions = [p1 if p2 < 0. else p2 for p1, p2 in
+            zip(self._global_default_proportions, self._default_proportions)]
+        default_prim_p = default_proportions[prim_dim]
+        default_sec_p = default_proportions[1-prim_dim]
         prim_proportions[:] = [default_prim_p if p < 0. else p for p in prim_proportions]
         sec_proportions[:] = [default_sec_p if p < 0. else p for p in sec_proportions]
 
