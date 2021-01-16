@@ -1,6 +1,6 @@
 # Author: Epihaius
 # Date: 2021-01-09
-# Last revision: 2021-01-09
+# Last revision: 2021-01-16
 #
 # This module defines a `Primitive` class, the purpose of which is to link
 # any kind of object with a position and size into the layout system.
@@ -12,13 +12,10 @@ class Primitive:
 
         self.type = "primitive"
         self.pos = (0, 0)
-        # the borders around the sizer
-        l, r, b, t = self._sizer_borders = sizer_borders
-        w, h = size
-        w = max(w, l + r)
-        h = max(h, b + t)
-        self._size = self._min_size = self.native_size = (w, h)
+        self._size = self._min_size = self._native_size = size
         self._sizer = None
+        # the borders around the sizer
+        self._sizer_borders = sizer_borders
         # the SizerCell this primitive is inside of
         self.sizer_cell = None
         self._on_destroy = lambda: None
@@ -88,11 +85,7 @@ class Primitive:
     @sizer_borders.setter
     def sizer_borders(self, sizer_borders):
 
-        l, r, b, t = self._sizer_borders = sizer_borders
-        w, h = self.native_size
-        w = max(w, l + r)
-        h = max(h, b + t)
-        self.native_size = (w, h)
+        self._sizer_borders = sizer_borders
 
         if self._sizer:
             self._sizer.owner = self
@@ -104,17 +97,23 @@ class Primitive:
 
     def get_min_size(self, ignore_sizer=False):
 
-        if ignore_sizer:
+        if ignore_sizer or not self._sizer:
             return self._min_size
 
-        if self._sizer:
-            l, r, b, t = self._sizer_borders
-            w_min, h_min = self._sizer.min_size
-            w_min += l + r
-            h_min += b + t
-            return (w_min, h_min)
+        l, r, b, t = self._sizer_borders
+        w_min, h_min = self._sizer.min_size
 
-        return self._min_size
+        return (w_min + l + r, h_min + b + t)
+
+    @property
+    def native_size(self):
+
+        l, r, b, t = self._sizer_borders
+        w, h = self._native_size
+        w = max(w, l + r)
+        h = max(h, b + t)
+
+        return (w, h)
 
     def get_size(self):
 
